@@ -58,8 +58,38 @@ module ``about the stock example`` =
     // tests for yourself along the way. You can also try 
     // using the F# Interactive window to check your progress.
 
+    let splitCommas (x:string) =
+        x.Split([|','|])
+
+    [<Koan>]
+    let SplitCommasTest() =
+        let expected = [|"2012-03-30";"32.40";"32.41";"32.04";"32.26";"31749400";"32.26"|]
+        let actual = "2012-03-30,32.40,32.41,32.04,32.26,31749400,32.26" |> splitCommas
+        AssertEquality expected actual
+
+    let getDateAndDifference (x:string[]) =
+        let Open = System.Double.Parse x.[1]
+        let Close = System.Double.Parse x.[4]
+        let AbsoluteDifferenceTwoDP = ((((Open - Close) |> abs) * 1000.0) |> truncate)/1000.0
+        AbsoluteDifferenceTwoDP, x.[0]
+
+    [<Koan>]
+    let GetDateAndDifferenceTest() =
+        let expected = 0.14, "2012-03-30"
+        let actual = [|"2012-03-30";"32.40";"32.41";"32.04";"32.26";"31749400";"32.26"|] |> getDateAndDifference
+        AssertEquality expected actual
+
+    
     [<Koan>]
     let YouGotTheAnswerCorrect() =
-        let result =  __
+        let datesAndDifferences = stockData.Tail
+                                |> List.map splitCommas
+                                |> List.map getDateAndDifference
+        
+        let maxDifference = datesAndDifferences
+                            |> List.map fst
+                            |> List.max
+        
+        let result = datesAndDifferences |> Map.ofList |> Map.find maxDifference
         
         AssertEquality "2012-03-13" result
